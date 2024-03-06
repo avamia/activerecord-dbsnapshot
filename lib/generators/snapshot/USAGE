@@ -1,0 +1,22 @@
+Description:
+    Generates a configuration class for database snapshots.
+
+Example:
+    rails generate snapshot NAME [options]
+
+    This will create:
+        - A new snapshot configuration file at db/snapshots/YYYYMMDDHHMMSS_NAME.rb
+
+Options:
+    --exclude_tables=one two three
+        This option allows you to specify tables that should be excluded from the snapshot.
+        You can list multiple tables by separating them with a space.
+
+        Example:
+            rails generate snapshot MySnapshot --exclude_tables=users sessions logs
+
+        This will generate a configuration file that excludes the 'users', 'sessions', and 'logs' tables.
+
+More Information:
+    The generated configuration file is a Ruby class that extends ActiveRecord::DbSnapshot.
+    You can edit this class to further customize the behavior of your database snapshot.
