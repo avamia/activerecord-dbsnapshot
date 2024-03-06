@@ -27,8 +27,6 @@ module ActiveRecord
 
         klass_name = File.basename(latest_config_file, '.rb').gsub(/^[^_]+_/, '').camelize
         klass = klass_name.constantize
-
-        puts klass.snapshot_name, klass.excluded_tables.inspect
         klass
       end
 
