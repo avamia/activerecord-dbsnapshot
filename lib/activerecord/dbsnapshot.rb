@@ -42,7 +42,7 @@ module ActiveRecord
       end
 
       def build_restore_command(db_config, file)
-        command = "pg_restore"
+        command = "PGPASSWORD=#{db_config[:password]} pg_restore"
         command << " --host=#{db_config[:host]}" if db_config[:host]
         command << " --port=#{db_config[:port]}" if db_config[:port]
         command << " --username=#{db_config[:username]}" if db_config[:username]
@@ -56,21 +56,21 @@ module ActiveRecord
 
       # Builds the dump command based on configuration
       def build_dump_command(config, db_config, output_file)
-        pg_dump_cmd = "pg_dump"
-        pg_dump_cmd << " -U #{db_config[:username]}"
-        pg_dump_cmd << " -h #{db_config[:host]}"
-        pg_dump_cmd << " #{db_config[:database]}"
+        command = "PGPASSWORD=#{db_config[:password]} pg_dump"
+        command << " -U #{db_config[:username]}"
+        command << " -h #{db_config[:host]}"
+        command << " #{db_config[:database]}"
 
         excluded_tables = config.excluded_tables.map(&:to_s).join(" ")
         if excluded_tables.empty?
-          return "#{pg_dump_cmd} > #{output_file}"
+          return "#{command} > #{output_file}"
         else
           excluded_tables_option = "--exclude-table=" + excluded_tables
-          return "#{pg_dump_cmd} #{excluded_tables_option} > #{output_file}"
+          return "#{command} #{excluded_tables_option} > #{output_file}"
         end
       end
 
-      # Executes the dump command
+      # Executes the command
       def execute_command(command)
         system(command)
       end
