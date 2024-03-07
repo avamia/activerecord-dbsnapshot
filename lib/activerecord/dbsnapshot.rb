@@ -26,8 +26,7 @@ module ActiveRecord
         require latest_config_file
 
         klass_name = File.basename(latest_config_file, '.rb').gsub(/^[^_]+_/, '').camelize
-        klass = klass_name.constantize
-        klass
+        klass_name.constantize
       end
 
       # Finds snapshot configuration by name
@@ -40,6 +39,19 @@ module ActiveRecord
 
         load config_file
         ActiveRecord::DbSnapshot.new
+      end
+
+      def build_restore_command(db_config, file)
+        command = "pg_restore"
+        command << " --host=#{db_config[:host]}" if db_config[:host]
+        command << " --port=#{db_config[:port]}" if db_config[:port]
+        command << " --username=#{db_config[:username]}" if db_config[:username]
+        command << " --dbname=#{db_config[:database]}" if db_config[:database]
+        command << " --no-owner" # Optional: Prevents restoring ownership information
+        command << " --disable-triggers" # Optional: Disable triggers during data restore
+        command << " --clean" # Optional: Clean (drop) existing database objects before restore
+        command << " #{file}"    # SQL file to restore
+        command
       end
 
       # Builds the dump command based on configuration
@@ -59,8 +71,8 @@ module ActiveRecord
       end
 
       # Executes the dump command
-      def execute_dump_command(dump_command)
-        system(dump_command)
+      def execute_command(command)
+        system(command)
       end
 
       private

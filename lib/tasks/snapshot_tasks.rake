@@ -28,17 +28,19 @@ namespace :db do
       db_config = ActiveRecord::Base.connection_config
       output_file = Rails.root.join('db', 'snapshots', "#{config.snapshot_name}.sql")
 
-      puts output_file
-
-
-      dump_command = ActiveRecord::DbSnapshot.build_dump_command(config, db_config, output_file)
-      ActiveRecord::DbSnapshot.execute_dump_command(dump_command)
+      command = ActiveRecord::DbSnapshot.build_dump_command(config, db_config, output_file)
+      ActiveRecord::DbSnapshot.execute_command(command)
 
       puts "Database dump completed: #{output_file}"
     end
 
     desc "Restore a snapshot SQL file into the database"
     task :restore, [:name] => :environment do |_, args|
+      unless `which pg_restore`.present?
+        puts "Error: pg_restore not found. Ensure PostgreSQL client tools are installed."
+        next
+      end
+
       name = args[:name]
       filename = "db/snapshots/#{name}.sql"
 
@@ -58,8 +60,9 @@ namespace :db do
       end
 
       # Restore the SQL file into the database
-      sql = File.read(filename)
-      ActiveRecord::Base.connection.execute(sql)
+      db_config = ActiveRecord::Base.connection_config
+      command = ActiveRecord::DbSnapshot.build_restore_command(db_config, filename)
+      ActiveRecord::DbSnapshot.execute_command(command)
 
       puts "Snapshot '#{name}' restored successfully."
     end
