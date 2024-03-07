@@ -25,7 +25,7 @@ namespace :db do
         next
       end
 
-      db_config = ActiveRecord::Base.connection_config
+      db_config = ActiveRecord::Base.connection_db_config
       output_file = Rails.root.join('db', 'snapshots', "#{config.snapshot_name}.sql")
 
       command = ActiveRecord::DbSnapshot.build_dump_command(config, db_config, output_file)
@@ -60,7 +60,7 @@ namespace :db do
       end
 
       # Restore the SQL file into the database
-      db_config = ActiveRecord::Base.connection_config
+      db_config = ActiveRecord::Base.connection_db_config
       command = ActiveRecord::DbSnapshot.build_restore_command(db_config, filename)
       ActiveRecord::DbSnapshot.execute_command(command)
 
